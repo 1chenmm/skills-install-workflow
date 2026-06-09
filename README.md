@@ -28,6 +28,48 @@
 | ⑥ 复查 | 检查 CLI / Token / 付费 | 不满足就别装 |
 | ⑦ 启用 | `/reload-skills` | 重启后自动激活 |
 
+### 常用技能安装链接
+
+以下是从 skills.sh 安装常用技能的推荐命令：
+
+| 技能 | 用途 | 安装命令 |
+|:----:|:----|:---------|
+| 🔍 **find-skills** | 跨仓库搜索技能 | `npx -y skills add vercel-labs/skills --skill find-skills -g --yes` |
+| 🛡️ **skill-vetter** | 安全审查 | `npx -y skills add useai-pro/openclaw-skills-security --skill skill-vetter -g --yes` |
+| 🔄 **agent-workflow** | 通用任务处理工作流 | `npx -y skills add ruvnet/ruflo --skill agent-workflow -g --yes` |
+| 🐛 **systematic-debugging** | 四阶段根因调试 | `npx -y skills add obra/superpowers --skill systematic-debugging -g --yes` |
+
+### 安装后检查清单
+
+```bash
+# 技能是否已加载
+skills_list() | grep <技能名>
+
+# 查看完整内容
+skill_view(name="<技能名>")
+
+# 检查依赖
+which <cli-name> 2>/dev/null || echo "❌ 缺少依赖"
+
+# 重新加载技能
+/reload-skills
+```
+
+---
+
+### Agentic Design Patterns 系列技能
+
+这四个技能实现 Google 提出的 Agentic Design Patterns，适合复杂任务：
+
+| 技能 | 模式 | 安装命令 |
+|:----:|:----|:---------|
+| 🎯 **agentic-context-engineering** | 上下文工程 | 在技能库中查找 |
+| 🔄 **agentic-prompt-pipeline** | 提示链 | 在技能库中查找 |
+| 🔁 **agentic-producer-critic** | 生产者-批评者 | 在技能库中查找 |
+| 👥 **agentic-multi-agent-orchestrator** | 多智能体编排 | 在技能库中查找 |
+
+> 🆕 找不到时，用 `find-skills` 搜索最新版本。
+
 ### 完整速查
 
 ```bash
@@ -100,6 +142,24 @@ which <cli>; [ -f ~/.config/<name>/token.json ]; echo $API_KEY
 # 7. Enable
 /reload-skills
 ```
+
+### Common Skill Install Links
+
+| Skill | Purpose | Install Command |
+|:----:|:--------|:----------------|
+| 🔍 **find-skills** | Cross-registry skill search | `npx -y skills add vercel-labs/skills --skill find-skills -g --yes` |
+| 🛡️ **skill-vetter** | Security review | `npx -y skills add useai-pro/openclaw-skills-security --skill skill-vetter -g --yes` |
+| 🔄 **agent-workflow** | General task workflow | `npx -y skills add ruvnet/ruflo --skill agent-workflow -g --yes` |
+| 🐛 **systematic-debugging** | Root cause debugging | `npx -y skills add obra/superpowers --skill systematic-debugging -g --yes` |
+
+### Agentic Design Patterns
+
+| Skill | Pattern | Install |
+|:----:|:--------|:--------|
+| 🎯 **agentic-context-engineering** | Context Engineering | Search in skill registry |
+| 🔄 **agentic-prompt-pipeline** | Prompt Chaining | Search in skill registry |
+| 🔁 **agentic-producer-critic** | Producer-Critic | Search in skill registry |
+| 👥 **agentic-multi-agent-orchestrator** | Multi-Agent Collaboration | Search in skill registry |
 
 ---
 
