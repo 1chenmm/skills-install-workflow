@@ -5,15 +5,9 @@
 [![Stars](https://img.shields.io/github/stars/1chenmm/skills-install-workflow?style=social)](https://github.com/1chenmm/skills-install-workflow)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## ⭐ Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=1chenmm/skills-install-workflow&type=Date)](https://star-history.com/#1chenmm/skills-install-workflow&Date)
-
 ---
 
 ## 🇨🇳 中文版
-
-**技能安装工作流** — 一个标准化的 7 步流程，用于安全地安装 AI Agent 技能。
 
 ### 核心思想
 
@@ -63,8 +57,6 @@ which <cli>; [ -f ~/.config/<name>/token.json ]; echo $API_KEY
 
 ## 🇺🇸 English Version
 
-**Skills Install Workflow** — A standardized 7-step security-first process for installing AI agent skills.
-
 ### Core Principles
 
 - **Cross-registry search**: Search skills.sh, clawhub.ai, and GitHub simultaneously
@@ -111,34 +103,40 @@ which <cli>; [ -f ~/.config/<name>/token.json ]; echo $API_KEY
 
 ---
 
-## 📁 文件结构
+## 📁 File Structure
 
 ```
 .
-├── README.md          # 本文件（中英文 + Star 趋势图）
+├── README.md          # 本文件（中英文分开 + Star 趋势图）
 ├── SKILL.md           # 完整工作流文档（可直接用于 Hermes Agent）
 └── LICENSE            # MIT 许可证
 ```
 
 ---
 
-## ⚡ 适用场景
+## ⚡ Use Cases
 
-- 安装 AI Agent 技能（如 Hermes Agent、Claude Code、OpenClaw 等）
-- 需要在多个技能仓库间搜索并对比
-- 要求安全审查，防止安装恶意技能
-- 管理技能库，避免重复安装功能重叠的技能
+- Installing AI Agent skills (e.g., Hermes Agent, Claude Code, OpenClaw)
+- Searching and comparing across multiple skill registries
+- Requiring security review to prevent malicious skill installation
+- Managing skill libraries to avoid duplicate functional overlaps
 
 ---
 
-## 🤝 致谢
+## 🤝 Credits
 
-- 基于 [skills.sh](https://skills.sh) 技能注册表
-- 集成 [agentspace-find-skills](https://skills.sh/agentspace-so/skills/find-skills) 跨仓库搜索
-- 安全审查由 [skill-vetter](https://skills.sh) 提供
+- Based on [skills.sh](https://skills.sh) skill registry
+- Integrated [agentspace-find-skills](https://skills.sh/agentspace-so/skills/find-skills) cross-registry search
+- Security review powered by [skill-vetter](https://skills.sh)
 
 ---
 
 ## 📜 License
 
 MIT License — 详见 [LICENSE](LICENSE) 文件。
+
+---
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=1chenmm/skills-install-workflow&type=Date)](https://star-history.com/#1chenmm/skills-install-workflow&Date)
