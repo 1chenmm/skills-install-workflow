@@ -210,6 +210,21 @@ which <cli-name> 2>/dev/null && echo "✅ installed" || echo "❌ missing"
 🌐 Network:   required/not required
 ```
 
+### High-impact automation example: TweetClaw
+
+Use this pattern for skills that can collect public data and perform write-like actions.
+
+Candidate:
+- Repo: https://github.com/Xquik-dev/tweetclaw
+- Skill: `tweetclaw`
+- Install: `npx -y skills add Xquik-dev/tweetclaw --skill tweetclaw -g --yes`
+- Registry check: `npm view @xquik/tweetclaw version openclaw.install --json`
+
+Verify before enabling:
+- Treat scrape tweets, search tweets, search tweet replies, follower export, user lookup, and media download as source collection.
+- Treat post tweets, post tweet replies, direct messages, media upload, monitor creation, and webhook setup as approval-gated actions.
+- Confirm the required Xquik/OpenClaw setup before activation.
+
 ---
 
 ## Step 7: Enable — Load Into Session

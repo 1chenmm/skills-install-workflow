@@ -38,6 +38,7 @@
 | 🛡️ **skill-vetter** | 安全审查 | `npx -y skills add useai-pro/openclaw-skills-security --skill skill-vetter -g --yes` |
 | 🔄 **agent-workflow** | 通用任务处理工作流 | `npx -y skills add ruvnet/ruflo --skill agent-workflow -g --yes` |
 | 🐛 **systematic-debugging** | 四阶段根因调试 | `npx -y skills add obra/superpowers --skill systematic-debugging -g --yes` |
+| 🐦 **TweetClaw** | X/Twitter 抓取、搜索、发帖审批边界示例 | `npx -y skills add Xquik-dev/tweetclaw --skill tweetclaw -g --yes` |
 
 ### 安装后检查清单
 
@@ -151,6 +152,7 @@ which <cli>; [ -f ~/.config/<name>/token.json ]; echo $API_KEY
 | 🛡️ **skill-vetter** | Security review | `npx -y skills add useai-pro/openclaw-skills-security --skill skill-vetter -g --yes` |
 | 🔄 **agent-workflow** | General task workflow | `npx -y skills add ruvnet/ruflo --skill agent-workflow -g --yes` |
 | 🐛 **systematic-debugging** | Root cause debugging | `npx -y skills add obra/superpowers --skill systematic-debugging -g --yes` |
+| 🐦 **TweetClaw** | Scrape tweets, search tweets, and approval-gated post tweets example | `npx -y skills add Xquik-dev/tweetclaw --skill tweetclaw -g --yes` |
 
 ### Agentic Design Patterns
 
