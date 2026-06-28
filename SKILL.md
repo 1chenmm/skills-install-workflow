@@ -1,7 +1,7 @@
 ---
 name: skills-install-workflow
 description: 技能安装7步工作流：搜索→去重→安全审查→安装→学习→复查→启用。含常用技能安装链接表。适用于从skills.sh安装任何技能。
-version: 2.4.0
+version: 2.5.0
 metadata:
   hermes:
     tags: [skills, workflow, install, security, dedup]
@@ -15,23 +15,26 @@ metadata:
 
 ## ① 搜索 — 跨仓库搜索 + 安全扫描
 
-**优先使用 `find-skills`（已安装）进行跨仓库搜索**，而不是只查 skills.sh。
+**优先加载 `find-skills` 技能进行跨仓库搜索**，而不是只查 skills.sh。
 
 ```bash
-bash ~/.hermes/skills/agentspace-find-skills/scripts/find.sh "<关键词>" --scan 2
+# 步骤1: 加载 find-skills 技能获取搜索方法
+skill_view(name="find-skills")
+
+# 步骤2: 用 npx skills find 多仓库搜索
+npx skills find "<关键词>"
 ```
 
 **为什么用 find-skills：**
-- 同时搜 **skills.sh + clawhub.ai + GitHub** 三大仓库
-- 每个仓库按自己的原生指标排序（安装量/Stars）
-- 自动标记 `✓ ALREADY ON YOUR MACHINE`（已安装的技能）
-- 自动对前 K 个候选做安全扫描（红/黄旗）
-- 支持相邻词汇多轮搜索（如搜 "ui ux" 也搜 "frontend design"）
+- 标准化搜索流程，先用 `skill_view` 加载技能获取最佳实践
+- 用 `npx skills find` 搜索 **skills.sh** 全仓库，按安装量排序
+- 支持 `--owner <owner>` 按仓库过滤（如 `--owner vercel-labs`）
+- 搜索结果包含安装量、来源仓库、安全评估（Gen/Socket/Snyk）
 
 **检查点：**
 - 找到 2-3 个候选技能
-- 记下 `owner/repo`、`skillId`、`安装量` 和 `风险等级`（✓ clean / ⚠ caution / ⛔ RISKY）
-- 如果已有技能标记了 `✓ ALREADY ON YOUR MACHINE`，直接去第②步确认
+- 记下 `owner/repo@skill`、`安装量` 和 `风险等级`
+- 加载 find-skills 后如果发现本地已有同名技能，去第②步确认
 
 **备选（无 find-skills 时回退）：**
 ```bash
@@ -185,7 +188,7 @@ web_extract(urls=["https://skills.sh/<owner>/<repo>/<name>"])
 
 **第三步：用 skill-vetter 执行自动扫描**
 
-**第四步（新增）：用 SkillSpector 执行深度安全扫描**
+**第四步：用 SkillSpector 执行深度安全扫描**
 
 如果安装了 SkillSpector（NVIDIA AI 技能安全扫描器），在 skill-vetter 审查后额外跑一次：
 
@@ -197,6 +200,9 @@ skillspector scan /tmp/staging/<技能名>/ --no-llm
 skillspector scan ~/.hermes/skills/<技能名>/ --no-llm
 ```
 
+> `skillspector` 别名只在交互会话中有效。cron 或无别名环境用完整路径：
+> `/root/miniconda3/envs/skillspector/bin/skillspector scan <目录> --no-llm`
+> 
 > `--no-llm` 跳过 LLM 语义分析（不需要 API Key），只跑静态规则扫描。  
 > 如需 LLM 分析，设 `OPENAI_API_KEY` 或 `DASHSCOPE_API_KEY` 环境变量即可。
 
@@ -238,7 +244,7 @@ skillspector scan ~/.hermes/skills/<技能名>/ --no-llm
 | ⚠️ | `docker` / `sudo` / `chmod 777` | 提权操作 — 警告 |
 | 🟢 | 纯文档技能 / 无外部依赖 | 安全 — 通过 |
 
-**第四步：手动补充 grep 扫描（快速确认）**
+**第五步：手动补充 grep 扫描（快速确认）**
 
 ```bash
 grep -cE '(curl|wget).*\|.*(ba)?sh' /tmp/skill.md    # 必须=0
@@ -388,9 +394,10 @@ skill_view(name="<技能名>")
 ## 完整速查
 
 ```bash
-# 1. 搜索（跨仓库）
-bash ~/.hermes/skills/agentspace-find-skills/scripts/find.sh "<关键词>" --scan 2
-# → 自动标记已安装、自动安全扫描
+# 1. 搜索（加载 find-skills 技能 + npx 搜索）
+skill_view(name="find-skills")
+npx skills find "<关键词>"
+# → 按安装量排序、含安全评估
 
 # 2. 去重（找到已安装标记则跳过）
 # → 对未标记的技能逐个 skill_view 对比触发词、工具、API、核心功能
@@ -424,7 +431,7 @@ which <cli>; [ -f ~/.config/<name>/token.json ]; echo $API_KEY
 - **skills.sh 安装的技能**用 `hermes skills uninstall` 删不了，直接 `rm -rf ~/.agents/skills/<name> ~/.hermes/skills/<name>`
 - **第①步优先用 find-skills**（已安装）进行跨仓库搜索，不要只查 skills.sh 一个仓库
 - **第②步去重不可跳过** — 名字不像≠功能不重叠。find-skills 已自动标记已安装技能，但对未标记的必须读 SKILL.md 代码对比
-- **第④步安全不可跳过** — 技能运行在 agent 权限下，能执行命令、读写文件。先用 `skill-vetter` 自动扫描，再手动 grep 确认
+- **第③b步安全不可跳过** — 技能运行在 agent 权限下，能执行命令、读写文件。先用 `skill-vetter` 自动扫描，再用 `skillspector` 深度扫描 + 手动 grep 确认
 - **付费技能** 确认余额后再用，避免意外扣费
 - **外部依赖**（CLI/Token）不满足就别装，装了也用不了
 
