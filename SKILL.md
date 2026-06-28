@@ -1,7 +1,7 @@
 ---
 name: skills-install-workflow
 description: 技能安装7步工作流：搜索→去重→安全审查→安装→学习→复查→启用。含常用技能安装链接表。适用于从skills.sh安装任何技能。
-version: 2.5.0
+version: 2.6.0
 metadata:
   hermes:
     tags: [skills, workflow, install, security, dedup]
@@ -13,28 +13,41 @@ metadata:
 
 ---
 
-## ① 搜索 — 跨仓库搜索 + 安全扫描
+## ① 搜索 — 双仓库搜索 (skills.sh + clawhub.ai)
 
-**优先加载 `find-skills` 技能进行跨仓库搜索**，而不是只查 skills.sh。
+**优先加载 `find-skills` 技能 + 同时搜 skills.sh 和 ClawHub。** ClawHub 的安装量更高、技能更成熟，优先从中选。
 
 ```bash
 # 步骤1: 加载 find-skills 技能获取搜索方法
 skill_view(name="find-skills")
 
-# 步骤2: 用 npx skills find 多仓库搜索
+# 步骤2: 用 npx skills find 搜 skills.sh
 npx skills find "<关键词>"
+
+# 步骤3: 用 clawhub search 搜 ClawHub（技能更丰富）
+clawhub search "<关键词>"
 ```
 
-**为什么用 find-skills：**
-- 标准化搜索流程，先用 `skill_view` 加载技能获取最佳实践
-- 用 `npx skills find` 搜索 **skills.sh** 全仓库，按安装量排序
-- 支持 `--owner <owner>` 按仓库过滤（如 `--owner vercel-labs`）
-- 搜索结果包含安装量、来源仓库、安全评估（Gen/Socket/Snyk）
+**两个仓库对比：**
+
+| 对比 | skills.sh (`npx skills`) | ClawHub (`clawhub search`) |
+|------|-------------------------|---------------------------|
+| 技能数量 | ~1万+ | 更丰富 |
+| 安装量 | 一般几百~几千 | **几千到几万**（普遍更高） |
+| 安全评估 | Gen/Socket/Snyk 三方 | 内置自动扫描 |
+| 搜索方式 | `npx skills find <关键词>` | `clawhub search <关键词>` |
+| 安装 | `npx skills add owner/repo@skill` | `clawhub install <slug>` |
+| 前缀 | `owner/repo@skill` 格式 | `@author/slug` 格式 |
+
+**为什么优先搜 ClawHub：**
+- 安装量普遍更高（几万下载的技能很多）
+- 同样是 Hermes 兼容的技能（SKILL.md + 脚本）
+- `clawhub install` 更简洁（直接装到 `./skills/` 目录）
 
 **检查点：**
-- 找到 2-3 个候选技能
-- 记下 `owner/repo@skill`、`安装量` 和 `风险等级`
-- 加载 find-skills 后如果发现本地已有同名技能，去第②步确认
+- 从两个仓库各找 2-3 个候选技能
+- 比较安装量、来源信誉、安全评估
+- 优先选 ClawHub 中安装量高、信誉好的
 
 **备选（无 find-skills 时回退）：**
 ```bash
@@ -51,7 +64,7 @@ for s in data.get('skills',[]):
 
 ## ② 去重 — 扫描本地技能库（不可跳过）
 
-**find-skills 已在第①步自动标记已安装技能**（`✓ ALREADY ON YOUR MACHINE`），如果候选中有标记，直接课定为重复，跳过安装。
+**第①步搜索后，用 `skills_list` 检查本地是否已有同名或类似功能技能**，如果已存在则跳过安装。
 
 如果 find-skills 没有标记或对比不确定，手动执行：
 
@@ -279,21 +292,45 @@ npx -y skills add <owner>/<repo> --skill <name> -g --yes
 - `~/.agents/skills/<name>/SKILL.md`
 - `~/.hermes/skills/<name>` → symlink 到上面
 
-### 方式 B：ClawHub/OpenClaw 生态技能
+### 方式 B：ClawHub 安装（推荐，技能更丰富）
+
+先通过 clawhub search 找到技能 slug，然后安装：
 
 ```bash
-npx clawhub@latest install <技能名>
-# 示例：npx clawhub@latest install baidu-search
-# 默认装到 /tmp/skills/<技能名>/，需手动搬到 Hermes 技能目录
+# 搜索
+clawhub search "<关键词>"
+
+# 安装（slug 格式：@作者/技能名 或 直接技能名）
+clawhub install <slug>
+
+# 示例
+clawhub install @barneyjm/search-2
 ```
 
-安装后检查文件结构，然后复制到 Hermes 技能目录：
+**ClawHub 安装特点：**
+- 装到当前目录的 `./skills/<name>/` 下
+- 自动生成 `.clawhub/lock.json` 锁定文件
+- 无 `-g` 全局参数，需手动搬到 Hermes 技能目录
+
+**安装后搬到 Hermes：**
 
 ```bash
-mkdir -p ~/.hermes/skills/<名称>/scripts
-cp /tmp/skills/<名称>/scripts/*.py ~/.hermes/skills/<名称>/scripts/
-# 创建或替换 SKILL.md 为 Hermes 兼容格式
+# 确保在目标仓库目录下操作（如 /tmp/<repo>）
+cd /tmp/<repo>
+clawhub install <slug>
+
+# 检查安装结果
+ls -la skills/<name>/
+
+# 搬到 Hermes 技能目录
+mkdir -p ~/.hermes/skills/<name>/
+cp -r skills/<name>/* ~/.hermes/skills/<name>/
+rm -rf skills/<name>/
+
+# 执行 /reload-skills 刷新
 ```
+
+> **为什么 ClawHub 优先：** ClawHub 的技能安装量普遍比 skills.sh 高一个数量级，社区更活跃，技能质量经过更多验证。同一功能的技能，ClawHub 的往往是更成熟的选择。
 
 ### 方式 C：GitHub 直接拉取
 
@@ -307,9 +344,39 @@ rm -rf /tmp/staging
 
 **注意：** 无论哪种安装方式，装完后都要创建 Hermes 兼容的 SKILL.md（带有 `---` frontmatter 和 `credentials` 字段）。
 
-### 方式 D：推送到 GitHub（开源你的技能/工作流）
+### 方式 E：安装 CLI 工具
 
-当需要把本地技能或工作流推送到 GitHub 仓库时，`gh` 已登录但 `git push` 报 auth 错误：
+当用户说的是安装一个**命令行工具**（如 `clawhub`、`openclaw`、`npx` 等），而不是 Hermes 技能时：
+
+```bash
+# npm 全局安装
+npm i -g <包名>
+
+# 验证安装
+<cli-name> --help
+
+# 检查登录状态（如适用）
+<cli-name> whoami
+```
+
+**如何区分用户要的是 skill 还是 CLI 工具：**
+- "安装 clawhub" → 先查文档（官方链接/docs）→ 如果是 `npm i -g` 的 CLI，走方式 E
+- "安装 xx 技能" → 搜 skills.sh / clawhub.ai → 走方式 A/B
+- 给的是官方文档链接 → 按文档指示安装
+
+**装完 CLI 工具后：**
+- 记下版本号、登录状态、搜索命令
+- 更新 `skills-install-workflow` 的搜索步骤（如果是搜索相关的 CLI）
+
+**推送前先加载 `github-push` 技能，它内置完整的敏感信息扫描和 git 历史审计流程：**
+
+```bash
+skill_view(name="github-push")
+```
+
+该技能会按 6 步流程执行：准备文件 → 敏感扫描（API Key/邮箱/手机/IP/SSH/账号）→ git 历史审计 → 文件审核 → 安全推送 → 推送后复查。
+
+如果 `gh` 已登录但 `git push` 报 auth 错误（头服服务器常见）：
 
 ```bash
 git remote set-url origin \
@@ -394,10 +461,13 @@ skill_view(name="<技能名>")
 ## 完整速查
 
 ```bash
-# 1. 搜索（加载 find-skills 技能 + npx 搜索）
+# 1. 搜索（双渠道）
+# 渠道A: skills.sh
 skill_view(name="find-skills")
 npx skills find "<关键词>"
-# → 按安装量排序、含安全评估
+# 渠道B: clawhub.ai
+clawhub search "<关键词>"
+# → 搜两个地方，互相补充
 
 # 2. 去重（找到已安装标记则跳过）
 # → 对未标记的技能逐个 skill_view 对比触发词、工具、API、核心功能
@@ -411,8 +481,9 @@ skill_view(name="skill-vetter")
 skillspector scan ~/.hermes/skills/<name>/ --no-llm
 # → 额外检测 AST/污点追踪/YARA签名等64种模式
 
-# 4. 安装
-npx -y skills add <owner>/<repo> --skill <name> -g --yes
+# 4. 安装（ClawHub 推荐）
+clawhub install <slug>                        # ClawHub方式（优先）
+# 或 npx -y skills add <owner>/<repo> --skill <name> -g --yes  # skills.sh方式
 
 # 5. 学习
 skill_view(name="<name>")
@@ -429,7 +500,7 @@ which <cli>; [ -f ~/.config/<name>/token.json ]; echo $API_KEY
 ## 注意事项
 
 - **skills.sh 安装的技能**用 `hermes skills uninstall` 删不了，直接 `rm -rf ~/.agents/skills/<name> ~/.hermes/skills/<name>`
-- **第①步优先用 find-skills**（已安装）进行跨仓库搜索，不要只查 skills.sh 一个仓库
+- **第①步优先用 find-skills** 搜索，不要只查 skills.sh。加载后按技能指示操作。
 - **第②步去重不可跳过** — 名字不像≠功能不重叠。find-skills 已自动标记已安装技能，但对未标记的必须读 SKILL.md 代码对比
 - **第③b步安全不可跳过** — 技能运行在 agent 权限下，能执行命令、读写文件。先用 `skill-vetter` 自动扫描，再用 `skillspector` 深度扫描 + 手动 grep 确认
 - **付费技能** 确认余额后再用，避免意外扣费
@@ -520,7 +591,49 @@ PYEOF
 python3 /tmp/write_key.py
 ```
 
-### 陷阱 7：ClawHub/GitHub 技能装完忘了搬文件和建 SKILL.md
+### 陷阱 8：替换已安装技能时忘了删旧版
+
+**来源：** 会话 2026-06-28，替换 find-skills (agentspace-find-skills → vercel-labs/skills)
+
+当需要替换一个已安装的技能（如从旧版换到新版/换来源）时：
+
+1. **先查旧版位置：** `find ~/.agents/skills/<旧名>/ ~/.hermes/skills/<旧名>/ -type f`
+2. **手动删除旧的：**
+   ```bash
+   rm -rf ~/.agents/skills/<旧名> ~/.hermes/skills/<旧名>
+   ```
+3. **再装新的**（否则 npx skills add 可能冲突）
+4. **执行 `/reload-skills`** 刷新列表
+5. **验证旧版消失：** `skills_list()` 确认不再出现
+
+### 陷阱 9：skills.sh 搜出来的技能"太拉了" — 预期管理
+
+**来源：** 会话 2026-06-28，用户评价搜索结果的反馈
+
+skills.sh 的搜索结果经常出现安装量低（<100）、作者未知、描述简略的技能。这**不是你的问题**，是公开技能库的普遍现状。不要因此反复换关键词搜，或推荐明显低质量的技能。
+
+**正确做法：**
+1. 承认现状："公开技能库质量参差不齐，这个方向没有特别好的现成技能"
+2. 换 **ClawHub 再搜一轮**：`clawhub search "<关键词>"`
+3. 如果两个渠道都没有满意的 → **"要不我直接给你写一个？"**
+
+**错误做法：**
+- 捏造安装量或好评来让技能显得更好
+- 推荐你肉眼都看不上的技能
+- 反复换关键词搜十几次还不放弃
+
+### 陷阱 10：用户说"安装 clawhub"不一定是安装 Hermes 技能
+
+**来源：** 会话 2026-06-28
+
+"clawhub" 既可以是一个 skills.sh 上的 OpenClaw 技能，也是一个 `npm i -g clawhub` 的 CLI 工具。用户给官方文档链接（docs.openclaw.ai/clawhub）时就说明是 CLI 工具。
+
+**判断方法：**
+- 用户只说名字 → 先搜 skills.sh，如果搜到的是 OpenClaw 专用的（命令是 `openclaw skills xxx`），问用户要做什么
+- 用户给官方文档链接 → 按文档装 CLI 工具
+- 不确定时直接问用户："你是要装一个 CLI 工具还是一个技能？"
+
+**不要用 `hermes skills uninstall` 卸载 skills.sh 安装的技能** — 那个命令只对 Hermes 原生技能有效。skills.sh 的技能用 `rm -rf` 物理删除。
 
 **来源：** 会话 2026-06-09，安装 baidu-search 和 byted-web-search
 
@@ -534,6 +647,7 @@ python3 /tmp/write_key.py
 
 ## 参考文件
 
+- `references/skillspector-usage.md` — SkillSpector 详细安装/使用/误报判断指南
 - `references/github-readme-format.md` — GitHub 开源时的 README 格式规范（中英文分开、Star 趋势图底部、脱敏）
 - `references/github-push-auth.md` — 用 `gh auth token` 解决 headless server 上 git push 的认证问题
 - `references/repo-sensitive-audit.md` — 开源前审计仓库：扫描 git 历史邮箱、源码中的 API Key/Token/手机号/QQ，修复 filter-branch 残留
@@ -545,6 +659,7 @@ python3 /tmp/write_key.py
 - `skill-cleaner` — 审计 prompt budget 和重复
 - `skill-vetter` — 安全审查
 - `find-skills` — 跨仓库搜索
+- `github-push` — 推送前敏感信息扫描 + git 历史审计
 
 - **配置修复模式** — 如果 model 配置被误修改（如正在切换 provider 时的回滚），检查 `hermes config` 确认并用 `python3` 直接修改 yaml 避免 `hermes config set` 的类型转换问题
 - **不要让 Agent 自动跑 ark-helper** — 用户偏好手动操作 TUI，ark-helper 的 TUI 交互太复杂，让用户自己去终端跑
