@@ -1,7 +1,7 @@
 ---
 name: skills-install-workflow
 description: 技能安装7步工作流：搜索→去重→安全审查→安装→学习→复查→启用。含常用技能安装链接表。适用于从skills.sh安装任何技能。
-version: 2.6.0
+version: 2.7.0
 metadata:
   hermes:
     tags: [skills, workflow, install, security, dedup]
@@ -13,41 +13,73 @@ metadata:
 
 ---
 
-## ① 搜索 — 双仓库搜索 (skills.sh + clawhub.ai)
+## ① 搜索 — 分两步搜，结果分开整理
 
-**优先加载 `find-skills` 技能 + 同时搜 skills.sh 和 ClawHub。** ClawHub 的安装量更高、技能更成熟，优先从中选。
+**先搜 ClawHub，再搜 skills.sh，结果分开呈现，不混在一起。**
+
+### 第一步：搜 ClawHub（优先，安装量更高）
 
 ```bash
-# 步骤1: 加载 find-skills 技能获取搜索方法
-skill_view(name="find-skills")
-
-# 步骤2: 用 npx skills find 搜 skills.sh
-npx skills find "<关键词>"
-
-# 步骤3: 用 clawhub search 搜 ClawHub（技能更丰富）
 clawhub search "<关键词>"
 ```
 
-**两个仓库对比：**
+**ClawHub 结果格式：**
+```
+技能名    @作者    功能描述    下载量
+code      @ivangdavila    通用代码助手    27,147 downloads
+```
 
-| 对比 | skills.sh (`npx skills`) | ClawHub (`clawhub search`) |
-|------|-------------------------|---------------------------|
-| 技能数量 | ~1万+ | 更丰富 |
-| 安装量 | 一般几百~几千 | **几千到几万**（普遍更高） |
-| 安全评估 | Gen/Socket/Snyk 三方 | 内置自动扫描 |
-| 搜索方式 | `npx skills find <关键词>` | `clawhub search <关键词>` |
-| 安装 | `npx skills add owner/repo@skill` | `clawhub install <slug>` |
-| 前缀 | `owner/repo@skill` 格式 | `@author/slug` 格式 |
+**整理 ClawHub 结果时按下载量排序，示例输出格式：**
 
-**为什么优先搜 ClawHub：**
-- 安装量普遍更高（几万下载的技能很多）
-- 同样是 Hermes 兼容的技能（SKILL.md + 脚本）
-- `clawhub install` 更简洁（直接装到 `./skills/` 目录）
+```
+━━ ClawHub 搜索结果 ━━
+  技能            作者            下载量    说明
+  ─────────────────────────────────────────────
+  xxx              @xxx           XX,XXX    xxx
+  yyy              @yyy           X,XXX     yyy
+```
+
+### 第二步：搜 skills.sh
+
+```bash
+skill_view(name="find-skills")
+npx skills find "<关键词>"
+```
+
+**skills.sh 结果格式：**
+```
+owner/repo@skill   安装量   说明
+vercel-labs/agent-skills@xxx   100K+   xxx
+```
+
+**整理 skills.sh 结果时按安装量排序，示例输出格式：**
+
+```
+━━ skills.sh 搜索结果 ━━
+  技能                       来源                   安装量    说明
+  ─────────────────────────────────────────────────────────────
+  xxx                        owner/repo             XX,XXX   xxx
+  yyy                        owner/repo             X,XXX    yyy
+```
+
+### 第三步：合并对比
+
+两个仓库的结果放到一起对比：
+
+| 技能 | 来源平台 | 安装量 | 说明 |
+|------|---------|--------|------|
+| `xxx` | 🔷 ClawHub | 27,147 | xxx |
+| `yyy` | 🔶 skills.sh | 100K+ | yyy |
+
+**标记规则：**
+- 🔷 ClawHub 结果用蓝色菱形标记
+- 🔶 skills.sh 结果用橙色菱形标记
+- 两个平台都有的同名技能，标出两边的安装量对比
 
 **检查点：**
-- 从两个仓库各找 2-3 个候选技能
-- 比较安装量、来源信誉、安全评估
-- 优先选 ClawHub 中安装量高、信誉好的
+- ClawHub 结果放上面（优先）
+- skills.sh 结果放下面（补充）
+- 最终合并表里标注清楚每个技能来自哪个平台
 
 **备选（无 find-skills 时回退）：**
 ```bash
@@ -344,7 +376,7 @@ rm -rf /tmp/staging
 
 **注意：** 无论哪种安装方式，装完后都要创建 Hermes 兼容的 SKILL.md（带有 `---` frontmatter 和 `credentials` 字段）。
 
-### 方式 E：安装 CLI 工具
+### 方式 D：安装 CLI 工具
 
 当用户说的是安装一个**命令行工具**（如 `clawhub`、`openclaw`、`npx` 等），而不是 Hermes 技能时：
 
@@ -461,13 +493,17 @@ skill_view(name="<技能名>")
 ## 完整速查
 
 ```bash
-# 1. 搜索（双渠道）
-# 渠道A: skills.sh
+# 1. 搜索（分两步，结果分开不混）
+# ── 第一步：ClawHub（优先）──
+clawhub search "<关键词>"
+
+# ── 第二步：skills.sh（补充）──
 skill_view(name="find-skills")
 npx skills find "<关键词>"
-# 渠道B: clawhub.ai
-clawhub search "<关键词>"
-# → 搜两个地方，互相补充
+
+# ── 第三步：合并对比 ──
+# 🔷 ClawHub 结果 | 🔶 skills.sh 结果
+# 输出合并表，标注来源
 
 # 2. 去重（找到已安装标记则跳过）
 # → 对未标记的技能逐个 skill_view 对比触发词、工具、API、核心功能
@@ -648,11 +684,13 @@ skills.sh 的搜索结果经常出现安装量低（<100）、作者未知、描
 ## 参考文件
 
 - `references/skillspector-usage.md` — SkillSpector 详细安装/使用/误报判断指南
+- `references/clawhub-integration.md` — ClawHub CLI 安装/搜索/安装后搬运/环境变量/陷阱
 - `references/github-readme-format.md` — GitHub 开源时的 README 格式规范（中英文分开、Star 趋势图底部、脱敏）
 - `references/github-push-auth.md` — 用 `gh auth token` 解决 headless server 上 git push 的认证问题
 - `references/repo-sensitive-audit.md` — 开源前审计仓库：扫描 git 历史邮箱、源码中的 API Key/Token/手机号/QQ，修复 filter-branch 残留
-- `references/skills-install-workflow-cleanup.md` — 技能库清理完整案例（从 105 到 63 的实操记录）
-
+- `references/skillspector-usage.md` — SkillSpector 详细安装/使用/误报判断指南
+- `references/clawhub-integration.md` — ClawHub CLI 安装/搜索/安装后搬运/环境变量/陷阱
+- `references/github-readme-format.md` — GitHub 开源时的 README 格式规范（中英文分开、Star 趋势图底部、脱敏）
 ## 相关技能
 
 - `skill-library-maintenance` — 技能库审计、清理、去重、配置漂移修复
