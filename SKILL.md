@@ -1,7 +1,7 @@
 ---
 name: skills-install-workflow
 description: 技能安装7步工作流：搜索→去重→安全审查→安装→学习→复查→启用。含常用技能安装链接表。适用于从skills.sh安装任何技能。
-version: 2.8.0
+version: 2.9.0
 metadata:
   hermes:
     tags: [skills, workflow, install, security, dedup]
@@ -19,9 +19,19 @@ metadata:
 
 ### 第一步：搜 ClawHub（优先，安装量更高）
 
+先搜再加载 ClawHub 的 find-skills 技能获取更多搜索策略：
+
 ```bash
+# 1. 直接搜
 clawhub search "<关键词>"
+
+# 2. 加载 ClawHub 的 find-skills 技能（补充搜索来源）
+skill_view(name="clawhub-find-skills")
+skill_view(name="find-skills-clawhub")
+# 这两个技能会教你怎么从 ClawHub Directory、LobeHub、GitHub 等更多来源搜
 ```
+
+> ⚠️ **ClawHub 搜索对关键词非常敏感！** "findskills"→2.5K 但 "find skills"→52K。如果第一次搜结果安装量偏低（<1000），**换关键词变体再搜一次**：加空格、换同义词、中英文都试。不要只看一个查询的结果就下结论。
 
 **ClawHub 结果格式：**
 ```
@@ -547,6 +557,8 @@ skill_view(name="<技能名>")
 # 1. 搜索（分两步，结果分开不混）
 # ── 第一步：ClawHub（优先）──
 clawhub search "<关键词>"
+skill_view(name="clawhub-find-skills")    # 加载更多搜索策略
+skill_view(name="find-skills-clawhub")
 
 # ── 第二步：skills.sh（补充）──
 skill_view(name="find-skills")
@@ -739,14 +751,11 @@ skills.sh 的搜索结果经常出现安装量低（<100）、作者未知、描
 
 ## 参考文件
 
+- `references/clawhub-integration.md` — ClawHub CLI 安装/搜索/详情查看/搬运指南
 - `references/skillspector-usage.md` — SkillSpector 详细安装/使用/误报判断指南
-- `references/clawhub-integration.md` — ClawHub CLI 安装/搜索/安装后搬运/环境变量/陷阱
 - `references/github-readme-format.md` — GitHub 开源时的 README 格式规范（中英文分开、Star 趋势图底部、脱敏）
 - `references/github-push-auth.md` — 用 `gh auth token` 解决 headless server 上 git push 的认证问题
 - `references/repo-sensitive-audit.md` — 开源前审计仓库：扫描 git 历史邮箱、源码中的 API Key/Token/手机号/QQ，修复 filter-branch 残留
-- `references/skillspector-usage.md` — SkillSpector 详细安装/使用/误报判断指南
-- `references/clawhub-integration.md` — ClawHub CLI 安装/搜索/安装后搬运/环境变量/陷阱
-- `references/github-readme-format.md` — GitHub 开源时的 README 格式规范（中英文分开、Star 趋势图底部、脱敏）
 ## 相关技能
 
 - `skill-library-maintenance` — 技能库审计、清理、去重、配置漂移修复
