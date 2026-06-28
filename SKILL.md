@@ -1,7 +1,7 @@
 ---
 name: skills-install-workflow
 description: 技能安装7步工作流：搜索→去重→安全审查→安装→学习→复查→启用。含常用技能安装链接表。适用于从skills.sh安装任何技能。
-version: 2.7.0
+version: 2.8.0
 metadata:
   hermes:
     tags: [skills, workflow, install, security, dedup]
@@ -62,7 +62,58 @@ vercel-labs/agent-skills@xxx   100K+   xxx
   yyy                        owner/repo             X,XXX    yyy
 ```
 
-### 第三步：合并对比
+### 第三步：查看技能详细介绍（装前必看）
+
+合并对比后，对排名前 2-3 的候选技能，**逐个拉取完整 SKILL.md 查看详细内容**，不要只看一句话简介。
+
+#### ClawHub 技能查看详情
+
+```bash
+# 方式1: 直接打开 skills.sh 页面（ClawHub 技能也在 skills.sh 有页面）
+web_extract(urls=["https://skills.sh/<owner>/<repo>/<skill>"])
+# 示例: web_extract(urls=["https://skills.sh/steipete/clawdis/clawhub"])
+
+# 方式2: 从 GitHub raw 拉取 SKILL.md
+curl -s "https://raw.githubusercontent.com/<owner>/<repo>/main/skills/<name>/SKILL.md" | head -80
+```
+
+#### skills.sh 技能查看详情
+
+```bash
+# 方式1: 从 skills.sh 页面看
+web_extract(urls=["https://skills.sh/<owner>/<repo>/<skill>"])
+
+# 方式2: GitHub raw
+curl -s "https://raw.githubusercontent.com/<owner>/<repo>/main/skills/<name>/SKILL.md" | head -80
+```
+
+**看什么：**
+
+| 查看项 | 重点内容 | 决定 |
+|--------|---------|------|
+| 🏷️ **触发词** | 什么时候自动激活 | 是否和你想要的功能匹配 |
+| 📋 **核心功能** | 实际能做什么，不能做什么 | 是否满足需求 |
+| 🔧 **依赖** | CLI/API Key/付费 | 环境是否满足 |
+| ⚠️ **权限** | 读什么文件、写什么文件 | 安全风险 |
+| 📝 **用法示例** | 具体怎么调用 | 是否直观好用 |
+
+**示例输出格式：**
+
+```
+━━ 候选技能详情 ──────────────────────
+技能: code (@ivangdavila)  ·  🔷 ClawHub  ·  ⬇ 27,147
+
+📋 功能: 通用代码助手，支持代码生成、重构、调试
+🔧 依赖: 无额外CLI，纯SKILL.md指令
+⚠️ 权限: 读当前文件、写当前文件
+📝 用法: "帮我把这个函数重构一下" / "生成一个排序算法"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+> **关键原则：** 安装量高≠适合你。必须看 SKILL.md 确认功能匹配、依赖满足、安全可控。至少看完前 2 个候选再决定。
+
+### 第四步：合并对比
 
 两个仓库的结果放到一起对比：
 
@@ -501,7 +552,12 @@ clawhub search "<关键词>"
 skill_view(name="find-skills")
 npx skills find "<关键词>"
 
-# ── 第三步：合并对比 ──
+# ── 第三步：查看详情（装前必看）──
+# 拉取前2个候选的SKILL.md，看触发词/功能/依赖/权限
+web_extract(urls=["https://skills.sh/<owner>/<repo>/<skill>"])
+# 或 curl raw.githubusercontent.com/.../SKILL.md | head -80
+
+# ── 第四步：合并对比 ──
 # 🔷 ClawHub 结果 | 🔶 skills.sh 结果
 # 输出合并表，标注来源
 
